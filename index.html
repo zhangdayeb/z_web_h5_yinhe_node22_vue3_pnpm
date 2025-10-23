@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="会员中心">
+  <meta name="theme-color" content="#1989fa">
+  <meta name="msapplication-TileColor" content="#1989fa">
+  <!-- 添加PWA支持 -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <!-- 防止缩放 -->
+  <meta name="format-detection" content="address=no,email=no">
+  <!-- SEO 优化 -->
+  <meta name="description" content="会员中心 - 移动端应用">
+  <meta name="keywords" content="会员中心,移动端,Vue3,Vant">
+  
+  <title>会员中心</title>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg">
+  <!-- 添加苹果设备图标 -->
+  <link rel="apple-touch-icon" href="/vite.svg">
+  
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #f7f8fa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      /* 移动端字体优化 */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* 防止文本选择 */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    * {
+      -webkit-tap-highlight-color: transparent;
+      /* 移动端滚动优化 */
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* 预加载样式 */
+    #app {
+      width: 100%;
+      min-height: 100vh;
+    }
+    
+    /* 避免FOUC */
+    .loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #1989fa;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="loading">加载中...</div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
