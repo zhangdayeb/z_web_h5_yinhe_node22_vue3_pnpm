@@ -255,7 +255,7 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, ref, nextTick, computed } from 'vue'
+  import { onMounted, onUnmounted, ref, nextTick, computed } from 'vue'
   import { useRouter } from 'vue-router'
   import { useI18n } from 'vue-i18n'
   import { showToast, showConfirmDialog } from 'vant'
@@ -724,15 +724,64 @@
     }
   }
 
+  // 整页滚动监听 - 支持滚动和上拉加载
   function setupScrollListener() {
-    const container = scrollContainer.value
-    if (!container) return
+    let startY = 0
+    let isLoading = false
 
-    ;(container as HTMLElement).addEventListener('scroll', () => {
-      const { scrollTop, scrollHeight, clientHeight } = container as HTMLElement
-      if (scrollTop + clientHeight >= scrollHeight - 50) {
-        loadMore()
+    // 监听滚动事件（距离底部80px触发）
+    const handleScroll = () => {
+      if (isLoading) return
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const scrollHeight = document.documentElement.scrollHeight
+      const clientHeight = window.innerHeight
+
+      // 距离底部80px时加载
+      if (scrollTop + clientHeight >= scrollHeight - 80) {
+        isLoading = true
+        loadMore().finally(() => {
+          setTimeout(() => {
+            isLoading = false
+          }, 500) // 防抖500ms
+        })
       }
+    }
+
+    // 监听触摸事件（上拉加载检测）
+    const handleTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0].pageY
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isLoading) return
+
+      const currentY = e.touches[0].pageY
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const scrollHeight = document.documentElement.scrollHeight
+      const clientHeight = window.innerHeight
+
+      // 向上滑动（上拉）且接近底部
+      if (currentY < startY && scrollTop + clientHeight >= scrollHeight - 100) {
+        isLoading = true
+        loadMore().finally(() => {
+          setTimeout(() => {
+            isLoading = false
+          }, 500)
+        })
+      }
+    }
+
+    // 添加事件监听
+    window.addEventListener('scroll', handleScroll)
+    document.addEventListener('touchstart', handleTouchStart, { passive: true })
+    document.addEventListener('touchmove', handleTouchMove, { passive: true })
+
+    // 组件卸载时移除监听
+    onUnmounted(() => {
+      window.removeEventListener('scroll', handleScroll)
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
     })
   }
 
@@ -911,8 +960,9 @@
     background: url('../../../assets/mobile/app/background.bmp') center/cover no-repeat, var(--color-m-background);
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     // Banner样式
     .my-swipe {
@@ -1244,10 +1294,10 @@
     .m-main-contain {
       display: flex;
       flex-direction: row;
-      flex: 1;
+      flex: none;
       background-color: var(--color-m-background);
       gap: 10px;
-      min-height: 0;
+      padding-bottom: 60px;
 
       .m-con-left {
         display: flex;
@@ -1538,14 +1588,13 @@
 
       .m-scroll-wrapper {
         position: relative;
-        height: 100%;
-        overflow-y: scroll;
+        overflow-y: visible;
 
         .m-scroll-content {
           position: relative;
 
           .m-scroll-list-wrapper {
-            overflow: hidden;
+            overflow: visible;
           }
         }
       }
@@ -1554,8 +1603,11 @@
     .m-main-footer {
       display: flex;
       height: 50px;
-      position: sticky;
+      position: fixed;
       bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
       z-index: 100;
     }
   }
